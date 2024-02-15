@@ -1,0 +1,4 @@
+
+Ncsharpsquid:S1144"*Remove the unused private class 'Mapping'.(“Œº¬8âÔØÄÙ1
+Scsharpsquid:S1144"0Remove the unused private constructor 'Mapping'.(Á·Êc8ãÔØÄÙ1
+csharpsquid:S3260"[Private classes which are not derived in the current assembly should be marked as 'sealed'.(“Œº¬8ãÔØÄÙ1
