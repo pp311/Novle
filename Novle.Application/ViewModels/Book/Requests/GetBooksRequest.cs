@@ -1,13 +1,13 @@
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using FluentValidation;
 
 namespace Novle.Application.ViewModels.Book.Requests;
 
-public class GetBooksRequest : IPagingRequest
+public class GetBooksRequest : PagingRequest
 {
     public int? AuthorId { get; set; }
+    public string? Search { get; set; }
     public int? GenreId { get; set; }
     [DefaultValue(BookSortByOption.Id)]
     public BookSortByOption SortBy { get; set; } = BookSortByOption.Id;

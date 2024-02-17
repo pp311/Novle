@@ -19,4 +19,12 @@ public static class QueryableExtension
         => isDescending 
             ? Queryable.OrderByDescending(query, orderByField.GetExpression()) 
             : Queryable.OrderBy(query, orderByField.GetExpression());
+    
+    public static IQueryable<TEntity> OrderBy<TEntity, TField>(
+        this IQueryable<TEntity> query, 
+        Expression<Func<TEntity, TField>> fieldSelector,
+        bool isDescending) where TEntity : class
+        => isDescending 
+            ? query.OrderByDescending(fieldSelector) 
+            : query.OrderBy(fieldSelector);
 }

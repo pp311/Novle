@@ -1,5 +1,4 @@
 using Carter;
-using Microsoft.AspNetCore.Mvc;
 using Novel.API.Filters;
 using Novle.Application.Common.Models;
 using Novle.Application.Services;
@@ -37,23 +36,20 @@ public class BookModule : ICarterModule
 
     private static async Task<int> CreateBookAsync(
         UpsertBookRequest request, 
-        BookService bookService, 
-        CancellationToken cancellationToken)
-        => await bookService.CreateBookAsync(request, cancellationToken);
+        BookService bookService) 
+        => await bookService.CreateBookAsync(request);
     
     private static async Task UpdateBookAsync(
         int id, 
         UpsertBookRequest request, 
-        BookService bookService, 
-        CancellationToken cancellationToken)
-        => await bookService.UpdateBookAsync(id, request, cancellationToken);
+        BookService bookService)
+        => await bookService.UpdateBookAsync(id, request);
     
-    private static async Task UpdateViewCountAsync(int id, BookService bookService, CancellationToken cancellationToken)
-        => await bookService.UpdateViewCountAsync(id, cancellationToken);
+    private static async Task UpdateViewCountAsync(int id, BookService bookService)
+        => await bookService.UpdateViewCountAsync(id);
     
     private static async Task DeleteBookAsync(
         int id, 
-        BookService bookService, 
-        CancellationToken cancellationToken)
-         => await bookService.DeleteBookAsync(id, cancellationToken);
+        BookService bookService) 
+         => await bookService.DeleteBookAsync(id);
 }
