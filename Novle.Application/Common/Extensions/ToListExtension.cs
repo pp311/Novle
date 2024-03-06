@@ -17,6 +17,7 @@ public static class ToListExtension
 
     public static Task<List<TDestination>> ProjectToListAsync<TDestination>(
         this IQueryable queryable, 
-        IConfigurationProvider configuration) where TDestination : class
-        => queryable.ProjectTo<TDestination>(configuration).AsNoTracking().ToListAsync();
+        IConfigurationProvider configuration,
+        CancellationToken cancellationToken) where TDestination : class
+        => queryable.ProjectTo<TDestination>(configuration).AsNoTracking().ToListAsync(cancellationToken);
 }

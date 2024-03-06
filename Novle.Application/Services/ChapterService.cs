@@ -12,29 +12,22 @@ using Novle.Domain.Repositories.Base;
 
 namespace Novle.Application.Services;
 
-public class ChapterService : BaseService
+public class ChapterService(
+    IChapterRepository chapterRepository,
+    IUnitOfWork unitOfWork,
+    IMapper mapper,
+    IBookRepository bookRepository)
+    : BaseService(unitOfWork, mapper)
 {
-    private readonly IChapterRepository _chapterRepository;
-    private readonly IBookRepository _bookRepository;
-
-    public ChapterService(IChapterRepository chapterRepository, 
-                          IUnitOfWork unitOfWork, 
-                          IMapper mapper,
-                          IBookRepository bookRepository) : base(unitOfWork, mapper)
-    {
-        _chapterRepository = chapterRepository;
-        _bookRepository = bookRepository;
-    }
-    
     public async Task DeleteChapterAsync(int id, int bookId)
     {
-        var isBookExists = await _bookRepository.AnyAsync(bookId);
+        var isBookExists = await bookRepository.AnyAsync(bookId);
         EntityNotFoundException.ThrowIfFalse<Book>(isBookExists, bookId);
         
-        var chapter = await _chapterRepository.GetByIdAsync(id);
+        var chapter = await chapterRepository.GetByIdAsync(id);
         EntityNotFoundException.ThrowIfNull(chapter, id);
         
-        _chapterRepository.Delete(chapter!);
+        chapterRepository.Delete(chapter!);
         await UnitOfWork.SaveChangesAsync();
     }
 
@@ -43,7 +36,7 @@ public class ChapterService : BaseService
         PagingRequest request, 
         CancellationToken ct)
     {
-        return await _chapterRepository.GetQuery(bookId)
+        return await chapterRepository.GetQuery(bookId)
             .OrderBy(c => c.Index, request.IsDescending)
             .ProjectTo<GetChapterTitleResponse>(_mapper.ConfigurationProvider)
             .ToPaginatedListAsync(request.PageNumber, request.PageSize, ct);
@@ -51,14 +44,14 @@ public class ChapterService : BaseService
 
     public async Task UpdateChapterAsync(int chapterId, int bookId, UpdateChapterRequest request)
     {
-        var isBookExists = await _bookRepository.AnyAsync(bookId);
+        var isBookExists = await bookRepository.AnyAsync(bookId);
         EntityNotFoundException.ThrowIfFalse<Book>(isBookExists, bookId);
 
-        var chapter = await _chapterRepository.GetByIdAsync(chapterId);
+        var chapter = await chapterRepository.GetByIdAsync(chapterId);
         EntityNotFoundException.ThrowIfNull(chapter, chapterId);
         
         chapter!.Update(request.Title, request.Content);
-        _chapterRepository.Update(chapter);
+        chapterRepository.Update(chapter);
         await UnitOfWork.SaveChangesAsync();
     }
     
@@ -67,7 +60,7 @@ public class ChapterService : BaseService
         int bookId, 
         CancellationToken cancellationToken)
     {
-        var chapter = await _chapterRepository.GetAsync(chapterId, bookId, cancellationToken);
+        var chapter = await chapterRepository.GetAsync(chapterId, bookId, cancellationToken);
         EntityNotFoundException.ThrowIfNull(chapter, chapterId);
         
         return _mapper.Map<GetChapterResponse>(chapter);
@@ -75,7 +68,7 @@ public class ChapterService : BaseService
 
     public async Task<int> CreateChapterAsync(int bookId, CreateChapterRequest request)
     {
-        var isBookExists = await _bookRepository.AnyAsync(bookId);
+        var isBookExists = await bookRepository.AnyAsync(bookId);
         EntityNotFoundException.ThrowIfFalse<Book>(isBookExists, bookId);
         
         var chapter = await Chapter.CreateAsync(
@@ -83,9 +76,9 @@ public class ChapterService : BaseService
             request.Content, 
             request.Index, 
             bookId, 
-            _chapterRepository);
+            chapterRepository);
         
-        _chapterRepository.Add(chapter);
+        chapterRepository.Add(chapter);
         await UnitOfWork.SaveChangesAsync();
         
         return chapter.Id;
@@ -93,11 +86,11 @@ public class ChapterService : BaseService
 
     public async Task UpdateChapterIndexAsync(int chapterId, int bookId, UpdateChapterIndexRequest request)
     {
-        var chapter = await _chapterRepository.GetAsync(chapterId, bookId);
+        var chapter = await chapterRepository.GetAsync(chapterId, bookId);
         EntityNotFoundException.ThrowIfNull(chapter, chapterId);
         
         chapter!.UpdateIndex(request.Index);
-        _chapterRepository.Update(chapter);
+        chapterRepository.Update(chapter);
         await UnitOfWork.SaveChangesAsync();
     }
 }

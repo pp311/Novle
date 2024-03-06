@@ -12,26 +12,17 @@ using Novle.Domain.Repositories.Base;
 
 namespace Novle.Application.Services;
 
-public class BookService : BaseService
+public class BookService(
+    IUnitOfWork unitOfWork,
+    IBookRepository bookRepository,
+    IMapper mapper,
+    IRepository<Genre> genreRepository,
+    IRepository<Author> authorRepository)
+    : BaseService(unitOfWork, mapper)
 {
-    private readonly IBookRepository _bookRepository;
-    private readonly IRepository<Author> _authorRepository;
-    private readonly IRepository<Genre> _genreRepository;
-    
-    public BookService(IUnitOfWork unitOfWork,
-                       IBookRepository bookRepository,
-                       IMapper mapper,
-                       IRepository<Genre> genreRepository,
-                       IRepository<Author> authorRepository) : base(unitOfWork, mapper)
-    {
-        _bookRepository = bookRepository;
-        _genreRepository = genreRepository;
-        _authorRepository = authorRepository;
-    }
-    
     public async Task<GetBookInfoResponse> GetBookByIdAsync(int id, CancellationToken cancellationToken)
     {
-        var book = await _bookRepository.GetByIdAsync(id, cancellationToken);
+        var book = await bookRepository.GetByIdAsync(id, cancellationToken);
         EntityNotFoundException.ThrowIfNull(book, id);
         
         return _mapper.Map<GetBookInfoResponse>(book);
@@ -39,7 +30,7 @@ public class BookService : BaseService
     
     public async Task<PaginatedList<GetBookInfoResponse>> GetBooksAsync(GetBooksRequest request, CancellationToken ct)
     {
-        return await _bookRepository
+        return await bookRepository
             .Search(request.Search)
             .WhereIf(request.AuthorId.HasValue, x => x.AuthorId == request.AuthorId!.Value)
             .WhereIf(request.GenreId.HasValue, x => x.Genres.Any(bg => bg.Id == request.GenreId!.Value))
@@ -50,10 +41,10 @@ public class BookService : BaseService
     
     public async Task<int> CreateBookAsync(UpsertBookRequest request)
     {
-        var isAuthorExists = await _authorRepository.AnyAsync(request.AuthorId);
+        var isAuthorExists = await authorRepository.AnyAsync(request.AuthorId);
         EntityNotFoundException.ThrowIfFalse<Author>(isAuthorExists, request.AuthorId);
 
-        var isAllGenresExists = await _genreRepository.IsAllExistAsync(request.GenreIds);
+        var isAllGenresExists = await genreRepository.IsAllExistAsync(request.GenreIds);
         EntityNotFoundException.ThrowIfFalse<Genre>(isAllGenresExists);
         
         var book = Book.Create(
@@ -63,7 +54,7 @@ public class BookService : BaseService
             request.AuthorId, 
             request.GenreIds);
         
-        _bookRepository.Add(book);
+        bookRepository.Add(book);
         await UnitOfWork.SaveChangesAsync();
         
         return book.Id;
@@ -71,13 +62,13 @@ public class BookService : BaseService
 
     public async Task UpdateBookAsync(int id, UpsertBookRequest request)
     {
-        var book = await _bookRepository.GetByIdAsync(id);
+        var book = await bookRepository.GetByIdAsync(id);
         EntityNotFoundException.ThrowIfNull(book, id);
         
-        var isAuthorExists = await _authorRepository.AnyAsync(request.AuthorId);
+        var isAuthorExists = await authorRepository.AnyAsync(request.AuthorId);
         EntityNotFoundException.ThrowIfFalse<Author>(isAuthorExists, request.AuthorId);
 
-        var isAllGenresExists = await _genreRepository.IsAllExistAsync(request.GenreIds);
+        var isAllGenresExists = await genreRepository.IsAllExistAsync(request.GenreIds);
         EntityNotFoundException.ThrowIfFalse<Genre>(isAllGenresExists);
         
         book!.Update(
@@ -87,31 +78,31 @@ public class BookService : BaseService
             request.AuthorId, 
             request.GenreIds);
         
-        _bookRepository.Update(book);
+        bookRepository.Update(book);
         await UnitOfWork.SaveChangesAsync();
     }
 
     public async Task DeleteBookAsync(int id)
     {
-        var book = await _bookRepository.GetByIdAsync(id);
+        var book = await bookRepository.GetByIdAsync(id);
         EntityNotFoundException.ThrowIfNull(book, id);
 
         book!.Delete();
-        _bookRepository.Delete(book);
+        bookRepository.Delete(book);
         await UnitOfWork.SaveChangesAsync();
     }
 
     public async Task UpdateViewCountAsync(int id)
     {
-        var book = await _bookRepository.GetByIdAsync(id);
+        var book = await bookRepository.GetByIdAsync(id);
         EntityNotFoundException.ThrowIfNull(book, id);
         
         book!.IncreaseViewCount();
-        _bookRepository.Update(book);
+        bookRepository.Update(book);
         await UnitOfWork.SaveChangesAsync();
     }
 
-    private IOrderByField GetOrderByField(BookSortByOption? option)
+    private static IOrderByField GetOrderByField(BookSortByOption? option)
     {
         // TODO: view count by day, week, month, year
         return option switch

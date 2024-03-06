@@ -6,6 +6,7 @@ using Novle.Application.Services;
 using Novle.Domain.Repositories.Base;
 using Novle.Infrastructure.Identity;
 using Novle.Infrastructure.Repositories.Base;
+using Serilog;
 
 namespace Novel.API.Extensions;
 
@@ -30,7 +31,8 @@ public static class ServiceExtension
     {
         services.AddDbContext<NovleDbContext>(options =>
         {
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
+            options.UseSqlServer(configuration.GetSection("ConnectionStrings:DefaultConnection").Value);
+            options.EnableSensitiveDataLogging();
         });
         return services;
     }
@@ -80,5 +82,18 @@ public static class ServiceExtension
         services.AddScoped<ICurrentUser, CurrentUser>();
         services.AddHttpContextAccessor();
         return services;
+    }
+
+    public static void ConfigureLogging(this WebApplicationBuilder builder)
+    {
+        builder.Host.UseSerilog((ctx, lc) => 
+            lc.ReadFrom.Configuration(ctx.Configuration)
+                .WriteTo.Console());
+    }
+    
+    public static void AddSettings(this WebApplicationBuilder builder)
+    {
+        var environment = builder.Environment.EnvironmentName.ToLower();
+        builder.Configuration.AddSystemsManager($"/{environment}");
     }
 }

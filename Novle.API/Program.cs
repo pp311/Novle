@@ -5,8 +5,12 @@ using Novel.API.Extensions;
 using Novel.API.Middlewares;
 using Novle.Application.Services;
 using Novle.Application.ViewModels;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.ConfigureLogging();
+builder.AddSettings();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -23,6 +27,7 @@ builder.Services
     .AddProblemDetails()
     .AddExceptionHandler<GlobalExceptionHandler>()
     .AddValidatorsFromAssemblyContaining<IRequest>(ServiceLifetime.Singleton);
+
 // builder.Services.ConfigureHttpJsonOptions(options =>
 // {
 //     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
@@ -40,6 +45,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseSerilogRequestLogging();
 app.UseExceptionHandler();
 app.UseCors("CorsPolicy");
 // app.UseAuthentication();
