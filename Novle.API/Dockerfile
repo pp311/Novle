@@ -18,9 +18,9 @@ RUN dotnet build "Novle.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "Novle.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
-COPY --from=build /src/Novle.API/https/* /app/publish/https/
 
 FROM base AS final
 WORKDIR /app
+COPY --from=publish /src/Novle.API/https/aspnetapp.pfx /https/
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Novle.API.dll"]
