@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Novle.Domain.Constants;
@@ -11,11 +12,10 @@ public class ApplicationUserConfiguration : IEntityTypeConfiguration<Application
     {
         builder.HasIndex(u => u.UserName).IsUnique();
         builder.HasIndex(u => u.Email).IsUnique();
-        
+
         builder.Property(u => u.Settings)
-            .IsRequired()
             .HasMaxLength(StringLength.ConfigurationJson);
-        
+
         builder.Property(u => u.FullName)
             .IsRequired()
             .HasMaxLength(StringLength.Name);
@@ -25,5 +25,32 @@ public class ApplicationUserConfiguration : IEntityTypeConfiguration<Application
 
         builder.Property(u => u.AvatarUrl)
             .HasMaxLength(StringLength.Url);
+
+        builder.HasData(
+            new ApplicationUser
+            {
+                Id = 1,
+                UserName = "admin",
+                NormalizedUserName = "ADMIN",
+                Email = "phucdk311@gmail.com",
+                NormalizedEmail = "PHUCDK311@GMAIL.COM",
+                EmailConfirmed = true,
+                PasswordHash = new PasswordHasher<ApplicationUser>().HashPassword(null, "Admin@123"),
+                SecurityStamp = Guid.NewGuid().ToString(),
+                FullName = "Phuc DK",
+            });
+    }
+}
+
+public class ApplicationUserRoleConfig : IEntityTypeConfiguration<IdentityUserRole<int>>
+{
+    public void Configure(EntityTypeBuilder<IdentityUserRole<int>> builder)
+    {
+        builder.HasData(
+            new IdentityUserRole<int>
+            {
+                RoleId = 1,
+                UserId = 1
+            });
     }
 }

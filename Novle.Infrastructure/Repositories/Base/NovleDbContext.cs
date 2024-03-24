@@ -68,13 +68,9 @@ public class NovleDbContext : IdentityDbContext<ApplicationUser, IdentityRole<in
     {
         foreach (var entry in ChangeTracker.Entries<ISoftDelete>())
         {
-            switch (entry.State)
-            {
-                case EntityState.Deleted:
-                    entry.State = EntityState.Modified;
-                    entry.Entity.IsDeleted = true;
-                    break;
-            }
+            if (entry.State != EntityState.Deleted) continue;
+            entry.State = EntityState.Modified;
+            entry.Entity.IsDeleted = true;
         }
     }
 }

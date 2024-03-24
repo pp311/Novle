@@ -1,7 +1,5 @@
 using Novle.Domain.Entities.Base;
 using Novle.Domain.Enums;
-using Novle.Domain.Exceptions;
-using Novle.Domain.Repositories.Base;
 
 namespace Novle.Domain.Entities;
 

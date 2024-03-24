@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Novle.Infrastructure.Repositories.Base;
 
@@ -11,9 +12,11 @@ using Novle.Infrastructure.Repositories.Base;
 namespace Novle.Infrastructure.Migrations
 {
     [DbContext(typeof(NovleDbContext))]
-    partial class NovleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240324090512_FixSettingsField")]
+    partial class FixSettingsField
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,26 +55,6 @@ namespace Novle.Infrastructure.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "Admin",
-                            NormalizedName = "ADMIN"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "Editor",
-                            NormalizedName = "EDITOR"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "User",
-                            NormalizedName = "USER"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -555,25 +538,6 @@ namespace Novle.Infrastructure.Migrations
                         .HasFilter("[UserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "c470f6a2-bfd1-4bbe-90ca-47eae23e0e13",
-                            Email = "phucdk311@gmail.com",
-                            EmailConfirmed = true,
-                            FullName = "Phuc DK",
-                            LockoutEnabled = false,
-                            NormalizedEmail = "PHUCDK311@GMAIL.COM",
-                            NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEAr4V77Ilp99xOXyfMWXwnxXOlUTdiF1bIIEJ3wIbZyjzbNk/1a98TV2phR8WgGAvA==",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "e151285a-5994-4a75-9346-81a59e68dd8f",
-                            TwoFactorEnabled = false,
-                            UserName = "admin"
-                        });
                 });
 
             modelBuilder.Entity("Novle.Infrastructure.Identity.RefreshToken", b =>

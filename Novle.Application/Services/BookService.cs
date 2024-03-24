@@ -24,10 +24,10 @@ public class BookService(
     {
         var book = await bookRepository.GetByIdAsync(id, cancellationToken);
         EntityNotFoundException.ThrowIfNull(book, id);
-        
-        return _mapper.Map<GetBookInfoResponse>(book);
-    } 
-    
+
+        return Mapper.Map<GetBookInfoResponse>(book);
+    }
+
     public async Task<PaginatedList<GetBookInfoResponse>> GetBooksAsync(GetBooksRequest request, CancellationToken ct)
     {
         return await bookRepository
@@ -35,10 +35,10 @@ public class BookService(
             .WhereIf(request.AuthorId.HasValue, x => x.AuthorId == request.AuthorId!.Value)
             .WhereIf(request.GenreId.HasValue, x => x.Genres.Any(bg => bg.Id == request.GenreId!.Value))
             .OrderBy(GetOrderByField(request.SortBy), request.IsDescending)
-            .ProjectTo<GetBookInfoResponse>(_mapper.ConfigurationProvider)
+            .ProjectTo<GetBookInfoResponse>(Mapper.ConfigurationProvider)
             .ToPaginatedListAsync(request.PageNumber, request.PageSize, ct);
     }
-    
+
     public async Task<int> CreateBookAsync(UpsertBookRequest request)
     {
         var isAuthorExists = await authorRepository.AnyAsync(request.AuthorId);
@@ -46,17 +46,17 @@ public class BookService(
 
         var isAllGenresExists = await genreRepository.IsAllExistAsync(request.GenreIds);
         EntityNotFoundException.ThrowIfFalse<Genre>(isAllGenresExists);
-        
+
         var book = Book.Create(
-            request.Title, 
-            request.Description, 
-            request.CoverUrl, 
-            request.AuthorId, 
+            request.Title,
+            request.Description,
+            request.CoverUrl,
+            request.AuthorId,
             request.GenreIds);
-        
+
         bookRepository.Add(book);
         await UnitOfWork.SaveChangesAsync();
-        
+
         return book.Id;
     }
 
@@ -64,20 +64,20 @@ public class BookService(
     {
         var book = await bookRepository.GetByIdAsync(id);
         EntityNotFoundException.ThrowIfNull(book, id);
-        
+
         var isAuthorExists = await authorRepository.AnyAsync(request.AuthorId);
         EntityNotFoundException.ThrowIfFalse<Author>(isAuthorExists, request.AuthorId);
 
         var isAllGenresExists = await genreRepository.IsAllExistAsync(request.GenreIds);
         EntityNotFoundException.ThrowIfFalse<Genre>(isAllGenresExists);
-        
+
         book!.Update(
-            request.Title, 
-            request.Description, 
-            request.CoverUrl, 
-            request.AuthorId, 
+            request.Title,
+            request.Description,
+            request.CoverUrl,
+            request.AuthorId,
             request.GenreIds);
-        
+
         bookRepository.Update(book);
         await UnitOfWork.SaveChangesAsync();
     }
@@ -96,7 +96,7 @@ public class BookService(
     {
         var book = await bookRepository.GetByIdAsync(id);
         EntityNotFoundException.ThrowIfNull(book, id);
-        
+
         book!.IncreaseViewCount();
         bookRepository.Update(book);
         await UnitOfWork.SaveChangesAsync();
@@ -107,21 +107,21 @@ public class BookService(
         // TODO: view count by day, week, month, year
         return option switch
         {
-            BookSortByOption.Id 
+            BookSortByOption.Id
                 => new OrderByField<Book, int>(x => x.Id),
-            BookSortByOption.Title 
+            BookSortByOption.Title
                 => new OrderByField<Book, string>(x => x.Title),
-            BookSortByOption.ViewCount 
+            BookSortByOption.ViewCount
                 => new OrderByField<Book, int>(x => x.ViewCount),
-            BookSortByOption.RatingCount 
+            BookSortByOption.RatingCount
                 => new OrderByField<Book, int>(x => x.Reviews.Count),
-            BookSortByOption.RatingScore 
+            BookSortByOption.RatingScore
                 => new OrderByField<Book, double>(x => x.Reviews.DefaultIfEmpty().Average(r => r != null ? r.Rating : 0)),
-            BookSortByOption.LatestUploaded 
+            BookSortByOption.LatestUploaded
                 => new OrderByField<Book, DateTime>(x => x.CreatedOn!.Value),
-            BookSortByOption.LatestUpdated 
+            BookSortByOption.LatestUpdated
                 => new OrderByField<Book, DateTime>(x => x.UpdatedOn!.Value),
-            BookSortByOption.ArchivedCount 
+            BookSortByOption.ArchivedCount
                 => new OrderByField<Book, int>(x => x.Archives.Count),
             _ => throw new ArgumentOutOfRangeException(nameof(option), option, null)
         };

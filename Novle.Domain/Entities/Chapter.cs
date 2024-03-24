@@ -5,8 +5,8 @@ namespace Novle.Domain.Entities;
 
 public class Chapter : AuditableEntity
 {
-    public string Title { get; set; } = null!;
-    public string Content { get; set; } = null!;
+    public string Title { get; set; }
+    public string Content { get; set; }
     public double Index { get; set; }
     public int WordCount { get; set; }
     
@@ -20,6 +20,7 @@ public class Chapter : AuditableEntity
         Content = content;
         BookId = bookId;
         WordCount = content.Split(" ").Length;
+        Index = index;
     }
     
     public static async Task<Chapter> CreateAsync(

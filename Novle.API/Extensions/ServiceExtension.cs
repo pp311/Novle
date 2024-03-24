@@ -1,6 +1,10 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Novel.API.Services;
+using Novle.Application.Common.Configurations;
 using Novle.Application.Common.Interfaces;
 using Novle.Application.Services;
 using Novle.Domain.Repositories.Base;
@@ -25,8 +29,8 @@ public static class ServiceExtension
             });
         });
         return services;
-    } 
-    
+    }
+
     public static IServiceCollection ConfigureDbContext(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<NovleDbContext>(options =>
@@ -36,17 +40,17 @@ public static class ServiceExtension
         });
         return services;
     }
-    
+
     public static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         services.AddScoped(typeof(IRepository<>), typeof(RepositoryBase<>));
         services.AddScoped<IUnitOfWork, UnitOfWork>();
-        
+
         services.Scan(scan => scan.FromAssembliesOf(typeof(RepositoryBase<>))
             .AddClasses(c => c.AssignableTo(typeof(RepositoryBase<>)))
             .AsImplementedInterfaces()
             .WithScopedLifetime());
-        
+
         return services;
     }
 
@@ -56,6 +60,12 @@ public static class ServiceExtension
             .AddClasses(c => c.AssignableTo<BaseService>())
             .AsSelf()
             .WithScopedLifetime());
+
+        services.Scan(scan => scan.FromAssemblyOf<NovleDbContext>()
+            .AddClasses(c => c.AssignableTo<IInfrastructureService>())
+            .AsMatchingInterface()
+            .WithScopedLifetime());
+
         return services;
     }
 
@@ -76,7 +86,7 @@ public static class ServiceExtension
             .AddDefaultTokenProviders();
         return services;
     }
-    
+
     public static IServiceCollection AddCurrentUser(this IServiceCollection services)
     {
         services.AddScoped<ICurrentUser, CurrentUser>();
@@ -86,14 +96,36 @@ public static class ServiceExtension
 
     public static void ConfigureLogging(this WebApplicationBuilder builder)
     {
-        builder.Host.UseSerilog((ctx, lc) => 
+        builder.Host.UseSerilog((ctx, lc) =>
             lc.ReadFrom.Configuration(ctx.Configuration)
                 .WriteTo.Console());
     }
-    
+
     public static void AddSettings(this WebApplicationBuilder builder)
     {
         var environment = builder.Environment.EnvironmentName.ToLower();
-        builder.Configuration.AddSystemsManager($"/{environment}");
+        builder.Configuration.AddSystemsManager($"/{environment}", TimeSpan.FromMinutes(5));
+
+        builder.Services.Configure<TokenSettings>(builder.Configuration.GetSection("Jwt"));
+    }
+
+    public static IServiceCollection AddAuthentication(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    ValidateLifetime = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetSection("Jwt:Key").Value)),
+                };
+            });
+        return services;
     }
 }

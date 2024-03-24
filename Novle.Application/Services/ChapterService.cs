@@ -38,7 +38,7 @@ public class ChapterService(
     {
         return await chapterRepository.GetQuery(bookId)
             .OrderBy(c => c.Index, request.IsDescending)
-            .ProjectTo<GetChapterTitleResponse>(_mapper.ConfigurationProvider)
+            .ProjectTo<GetChapterTitleResponse>(Mapper.ConfigurationProvider)
             .ToPaginatedListAsync(request.PageNumber, request.PageSize, ct);
     }
 
@@ -63,7 +63,7 @@ public class ChapterService(
         var chapter = await chapterRepository.GetAsync(chapterId, bookId, cancellationToken);
         EntityNotFoundException.ThrowIfNull(chapter, chapterId);
         
-        return _mapper.Map<GetChapterResponse>(chapter);
+        return Mapper.Map<GetChapterResponse>(chapter);
     }
 
     public async Task<int> CreateChapterAsync(int bookId, CreateChapterRequest request)

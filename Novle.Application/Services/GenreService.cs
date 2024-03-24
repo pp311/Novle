@@ -16,6 +16,6 @@ public class GenreService(
     {
         return await genreRepository
             .GetQuery()
-            .ProjectToListAsync<GetGenreResponse>(_mapper.ConfigurationProvider, cancellationToken);
+            .ProjectToListAsync<GetGenreResponse>(Mapper.ConfigurationProvider, cancellationToken);
     }
 }

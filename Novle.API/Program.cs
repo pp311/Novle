@@ -5,6 +5,7 @@ using Novel.API.Extensions;
 using Novel.API.Middlewares;
 using Novle.Application.Services;
 using Novle.Application.ViewModels;
+using Novle.Infrastructure.Repositories.Base;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,9 +24,10 @@ builder.Services
     .AddRepositories()
     .AddServices()
     .AddCurrentUser()
-    .AddAutoMapper(typeof(BaseService).Assembly)
+    .AddAutoMapper(typeof(BaseService).Assembly, typeof(NovleDbContext).Assembly)
     .AddProblemDetails()
     .AddExceptionHandler<GlobalExceptionHandler>()
+    .AddAuthentication(builder.Configuration)
     .AddValidatorsFromAssemblyContaining<IRequest>(ServiceLifetime.Singleton);
 
 // builder.Services.ConfigureHttpJsonOptions(options =>
@@ -36,14 +38,13 @@ builder.Services.Configure<Microsoft.AspNetCore.Mvc.JsonOptions>(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
-    
+
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+await app.MigrateDatabaseAsync();
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseSerilogRequestLogging();
 app.UseExceptionHandler();

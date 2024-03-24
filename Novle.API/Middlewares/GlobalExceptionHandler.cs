@@ -29,6 +29,7 @@ public class GlobalExceptionHandler : IExceptionHandler
         {
             EntityNotFoundException _ => (int) HttpStatusCode.NotFound,
             SqlException _ => (int) HttpStatusCode.InternalServerError,
+            AuthException _ => (int) HttpStatusCode.Unauthorized,
             _ => (int) HttpStatusCode.InternalServerError
         };
         
