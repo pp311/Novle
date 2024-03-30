@@ -6,8 +6,8 @@ session = HTMLSession()
 BASE = 'https://bachngocsach.com.vn/'
 # Connect to the database
 conn = pyodbc.connect('DRIVER={ODBC Driver 18 for SQL Server};'
-                        'SERVER=localhost,1433;'
-                        'DATABASE=WebTruyenChuDB;'
+                        'SERVER=127.0.0.1,1433;'
+                        'DATABASE=NovleDB;'
                         'UID=sa;'
                         'PWD=Admin123;TrustServerCertificate=yes;')
 
@@ -29,11 +29,11 @@ def get_chapter_info(link, bookId, chapterIndex):
     content = r.html.find('#noi-dung', first=True).text
     word_count = r.html.find('.wordcount', first=True).text.split(' ')[0]
     created_at = datetime.datetime.now()
-    created_by = 'pp311'
+    created_by = 1
     modified_at = datetime.datetime.now()
-    modified_by = 'pp311'
+    modified_by = 1
 
-    execute_query("INSERT INTO Chapters (ChapterName, BookID, Content, WordCount, CreatedAt, CreatedBy, ModifiedAt, ModifiedBy, ChapterIndex) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (title, bookId, content, word_count, created_at, created_by, modified_at, modified_by, chapterIndex))
+    execute_query("INSERT INTO Chapter (Title, BookId, Content, WordCount, CreatedOn, CreatedBy, UpdatedOn, UpdatedBy, [Index]) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (title, bookId, content, word_count, created_at, created_by, modified_at, modified_by, chapterIndex))
 
 
 #get book info
@@ -52,28 +52,28 @@ def get_book_info(link):
             status = 'completed'
         poster = r.html.find('#anhbia > img', first=True).attrs['src']
         created_at = datetime.datetime.now()
-        created_by = 'pp311'
+        created_by = 1
         modified_at = datetime.datetime.now()
-        modified_by = 'pp311'
+        modified_by = 1
         
         #insert & get author id
-        row = execute_read_query("SELECT * FROM Authors WHERE AuthorName = ?", (author,))
+        row = execute_read_query("SELECT * FROM Author WHERE Name = ?", (author,))
         # print(title, author, genre_list, description, status, poster, sep='\n')
         if len(row) == 0:
-            execute_query("INSERT INTO Authors (AuthorName, CreatedAt, CreatedBy, ModifiedAt, ModifiedBy) VALUES (?, ?, ?, ?, ?)", (author, created_at, created_by, modified_at, modified_by))
-        author_id = execute_read_query("SELECT AuthorID FROM Authors WHERE AuthorName = ?", (author,))[0][0]
+            execute_query("INSERT INTO Author (Name, CreatedOn, CreatedBy, UpdatedOn, UpdatedBy) VALUES (?, ?, ?, ?, ?)", (author, created_at, created_by, modified_at, modified_by))
+        author_id = execute_read_query("SELECT Id FROM Author WHERE Name = ?", (author,))[0][0]
         
         #insert & get book id
-        execute_query("INSERT INTO Books (BookName, AuthorID, Description, Status, PosterUrl, CreatedAt, CreatedBy, ModifiedAt, ModifiedBy, ViewCount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (title, author_id, description, status, poster, created_at, created_by, modified_at, modified_by, 0))
-        book_id = execute_read_query("SELECT BookID FROM Books WHERE BookName = ?", (title,))[0][0]
+        execute_query("INSERT INTO Book (Title, AuthorId, Description, Status, CoverUrl, CreatedOn, CreatedBy, UpdatedOn, UpdatedBy, ViewCount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (title, author_id, description, status, poster, created_at, created_by, modified_at, modified_by, 0))
+        book_id = execute_read_query("SELECT Id FROM Book WHERE Title = ?", (title,))[0][0]
 
         for genre in genre_list:
-            row = execute_read_query("SELECT * FROM Genres WHERE GenreName = ?", (genre,))
+            row = execute_read_query("SELECT * FROM Genre WHERE Name = ?", (genre,))
             if len(row) == 0:
-                execute_query("INSERT INTO Genres (GenreName, CreatedAt, CreatedBy, ModifiedAt, ModifiedBy) VALUES (?, ?, ?, ?, ?)", (genre, created_at, created_by, modified_at, modified_by))
-            genre_id = execute_read_query("SELECT GenreID FROM Genres WHERE GenreName = ?", (genre,))[0][0]
-            if len(execute_read_query("SELECT * FROM BookGenres WHERE BookID = ? AND GenreID = ?", (book_id, genre_id,))) == 0:
-                execute_query("INSERT INTO BookGenres (BookID, GenreID, CreatedAt, CreatedBy, ModifiedAt, ModifiedBy) VALUES (?, ?, ?, ?, ?, ?)", (book_id, genre_id, created_at, created_by, modified_at, modified_by))
+                execute_query("INSERT INTO Genre (Name) VALUES (?)", (genre,))
+            genre_id = execute_read_query("SELECT Id FROM Genre WHERE Name = ?", (genre,))[0][0]
+            if len(execute_read_query("SELECT * FROM BookGenre WHERE BookId = ? AND GenreId = ?", (book_id, genre_id))) == 0:
+                execute_query("INSERT INTO BookGenre (BookId, GenreId) VALUES (?, ?)", (book_id, genre_id))
         
         #get chapter list
         r_chapter = session.get(link + '/muc-luc?page=all')
@@ -81,8 +81,8 @@ def get_book_info(link):
         for chapter_link in chapter_links:
             print(title + ' chuong ' + str(chapter_links.index(chapter_link) + 1) )
             get_chapter_info(BASE + chapter_link.attrs['href'], book_id, chapter_links.index(chapter_link) + 1)
-    except:
-        print('error')
+    except Exception as e:
+        print(e)
         return
 
 for i in range (0,12):

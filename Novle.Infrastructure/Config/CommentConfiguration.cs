@@ -13,7 +13,7 @@ public class CommentConfiguration : IEntityTypeConfiguration<Comment>
         
         builder.Property(c => c.EntityType).HasConversion(
             v => v.ToValue(),
-            v => (CommentableEntityType)Enum.Parse(typeof(CommentableEntityType), v));
+            v => v.ToEnum<CommentableEntityType>());
         
         builder.HasIndex(c => new { c.EntityId, c.EntityType })
             .IsUnique();

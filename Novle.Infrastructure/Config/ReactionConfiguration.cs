@@ -13,7 +13,7 @@ public class ReactionConfiguration : IEntityTypeConfiguration<Reaction>
 
         builder.Property(r => r.Type).HasConversion(
             v => v.ToValue(),
-            v => (ReactionType)Enum.Parse(typeof(ReactionType), v));
+            v => v.ToEnum<ReactionType>());
         
         builder.HasOne(r => r.Comment)
             .WithMany(c => c.Reactions)

@@ -16,7 +16,7 @@ public class BookConfiguration : IEntityTypeConfiguration<Book>
         
         builder.Property(b => b.Status).HasConversion(
             v => v.ToValue(),
-            v => (BookStatus)Enum.Parse(typeof(BookStatus), v));
+            v => v.ToEnum<BookStatus>());
         
         builder.HasMany(b => b.Genres)
             .WithMany(g => g.Books)

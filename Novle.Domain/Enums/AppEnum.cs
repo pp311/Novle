@@ -18,6 +18,23 @@ public static class EnumExtensions
         
         return attributes.Length > 0 ? attributes[0].StringValue : string.Empty;
     }
+    
+    public static T ToEnum<T>(this string value) where T : Enum
+    {
+        var type = typeof(T);
+        if (!type.IsEnum) throw new InvalidOperationException();
+        
+        foreach (var field in type.GetFields())
+        {
+            if (field.GetCustomAttributes(typeof(StringValueAttribute), false) is not StringValueAttribute[] attributes) 
+                continue;
+            
+            if (attributes.Length > 0 && attributes[0].StringValue == value)
+                return (T)field.GetValue(null)!;
+        }
+        
+        throw new KeyNotFoundException();
+    }
 }
 
 public enum AppRole
@@ -29,7 +46,7 @@ public enum AppRole
 
 public enum BookStatus
 { 
-    [StringValue("ongoing")]OnGoing,
+    [StringValue("ongoing")]OnGoing = 1,
     [StringValue("completed")]Completed = 2,
     [StringValue("paused")]Paused = 3,
     [StringValue("abandoned")]Abandoned = 4,
