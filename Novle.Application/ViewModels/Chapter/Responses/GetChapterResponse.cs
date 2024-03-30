@@ -13,7 +13,7 @@ public class GetChapterResponse
     
     public int WordCount { get; set; }
     public DateTime CreatedOn { get; set; }
-    public DateTime LastModifiedOn { get; set; }
+    public DateTime UpdatedOn { get; set; }
     
     private class Mapping : Profile 
     {
