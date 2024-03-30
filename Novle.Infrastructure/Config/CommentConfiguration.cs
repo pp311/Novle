@@ -12,7 +12,7 @@ public class CommentConfiguration : IEntityTypeConfiguration<Comment>
         builder.Property(c => c.Content).IsRequired();
         
         builder.Property(c => c.EntityType).HasConversion(
-            v => v.ToString(),
+            v => v.ToValue(),
             v => (CommentableEntityType)Enum.Parse(typeof(CommentableEntityType), v));
         
         builder.HasIndex(c => new { c.EntityId, c.EntityType })

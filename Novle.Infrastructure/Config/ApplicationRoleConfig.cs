@@ -12,19 +12,19 @@ public class ApplicationRoleConfiguration : IEntityTypeConfiguration<IdentityRol
             new IdentityRole<int>
             {
                 Id = 1,
-                Name = "Admin",
+                Name = "admin",
                 NormalizedName = "ADMIN"
             },
             new IdentityRole<int>
             {
                 Id = 2,
-                Name = "Editor",
+                Name = "editor",
                 NormalizedName = "EDITOR"
             },
             new IdentityRole<int>
             {
                 Id = 3,
-                Name = "User",
+                Name = "user",
                 NormalizedName = "USER"
             }
         );

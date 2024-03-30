@@ -15,7 +15,7 @@ public class BookConfiguration : IEntityTypeConfiguration<Book>
         builder.Property(b => b.CoverUrl).HasMaxLength(StringLength.Url).IsRequired(false);
         
         builder.Property(b => b.Status).HasConversion(
-            v => v.ToString(),
+            v => v.ToValue(),
             v => (BookStatus)Enum.Parse(typeof(BookStatus), v));
         
         builder.HasMany(b => b.Genres)

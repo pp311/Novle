@@ -12,9 +12,9 @@ public class UpsertBookRequest : IRequest
     public string? CoverUrl { get; set; }
 }
 
-public class CreateBookValidator : AbstractValidator<UpsertBookRequest>
+public class UpsertBookValidator : AbstractValidator<UpsertBookRequest>
 {
-    public CreateBookValidator()
+    public UpsertBookValidator()
     {
         RuleFor(x => x.Title).NotEmpty().MaximumLength(StringLength.Name);
         RuleFor(x => x.Description).NotEmpty().MaximumLength(StringLength.Description);

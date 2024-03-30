@@ -12,4 +12,24 @@ public class Author : AuditableEntity, ISoftDelete
     public bool IsDeleted { get; set; }
 
     public ICollection<Book> Books { get; set; } = new HashSet<Book>();
+    
+    public Author(string name, string? description, string? avatarUrl, DateTime? birthDay)
+    {
+        Name = name;
+        Description = description;
+        AvatarUrl = avatarUrl;
+        BirthDay = birthDay;
+    }
+    
+    public void Update(string name, string? description, string? avatarUrl, DateTime? birthDay)
+    {
+        Name = name;
+        Description = description;
+        AvatarUrl = avatarUrl;
+        BirthDay = birthDay;
+    }
+
+    public void Delete()
+    {
+    }
 }

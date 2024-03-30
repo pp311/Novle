@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Novle.Infrastructure.Repositories.Base;
 
@@ -11,9 +12,11 @@ using Novle.Infrastructure.Repositories.Base;
 namespace Novle.Infrastructure.Migrations
 {
     [DbContext(typeof(NovleDbContext))]
-    partial class NovleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240330041313_UpdateEnum")]
+    partial class UpdateEnum
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

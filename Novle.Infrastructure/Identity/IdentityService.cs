@@ -41,7 +41,7 @@ public class IdentityService(
         var applicationUser = mapper.Map<ApplicationUser>(user);
         var result = await userManager.CreateAsync(applicationUser, password);
         if (result.Succeeded)
-            result = await userManager.AddToRoleAsync(applicationUser, AppRole.User.ToString());
+            result = await userManager.AddToRoleAsync(applicationUser, AppRole.User.ToValue());
 
         return result.Succeeded;
     }
