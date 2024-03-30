@@ -1,5 +1,6 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
 using Novle.Application.Common.Extensions;
 using Novle.Application.Common.Models;
 using Novle.Application.Helpers;
@@ -22,10 +23,13 @@ public class BookService(
 {
     public async Task<GetBookInfoResponse> GetBookByIdAsync(int id, CancellationToken cancellationToken)
     {
-        var book = await bookRepository.GetByIdAsync(id, cancellationToken);
+        var book = await bookRepository.GetById(id)
+            .ProjectTo<GetBookInfoResponse>(Mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync(cancellationToken);
+        
         EntityNotFoundException.ThrowIfNull(book, id);
 
-        return Mapper.Map<GetBookInfoResponse>(book);
+        return book!;
     }
 
     public async Task<PaginatedList<GetBookInfoResponse>> GetBooksAsync(GetBooksRequest request, CancellationToken ct)

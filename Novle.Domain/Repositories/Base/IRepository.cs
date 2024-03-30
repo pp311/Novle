@@ -6,6 +6,7 @@ namespace Novle.Domain.Repositories.Base;
 public interface IRepository<TEntity> where TEntity : Entity
 {
     Task<TEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+    IQueryable<TEntity> GetById(int id);
     Task<TEntity?> GetAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
     Task<List<TEntity>> GetListAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken ct = default);
     IQueryable<TEntity> GetQuery(Expression<Func<TEntity, bool>>? predicate = null);

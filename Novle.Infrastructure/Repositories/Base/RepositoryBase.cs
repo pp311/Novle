@@ -22,6 +22,8 @@ public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : Enti
         return DbSet.AsQueryable().FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
     }
 
+    public IQueryable<TEntity> GetById(int id) => DbSet.Where(_ => _.Id == id);
+
     public Task<TEntity?> GetAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken)
     {
         return DbSet.Where(predicate).FirstOrDefaultAsync(cancellationToken);
